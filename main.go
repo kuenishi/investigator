@@ -73,7 +73,8 @@ func do_import(tag, file string) {
 	}
 
 	riak_debug.MaybeCreateAllTables(c)
-	riak_debug.ImportCommandsResult(import_target + "/commands", c)
+	riak_debug.ImportCommandsResult(import_target+"/commands", c)
+	riak_debug.ImportLogsResult(import_target+"/logs/platform_log_dir", c)
 
 	//tx, _ := c.Begin()
 	//stmt, _ := tx.Prepare("INSERT INTO x VALUES(?, ?, ?)")
@@ -88,7 +89,7 @@ func do_import(tag, file string) {
 	//	rows.Scan(&a, &b, &c)
 	//	fmt.Println("%v %v %v", a, b, c)
 	//}
-	//c.Close()
+	defer c.Close()
 }
 func do_diag(tag string) {
 }

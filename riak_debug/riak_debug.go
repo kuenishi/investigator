@@ -1,10 +1,10 @@
-
 package riak_debug
 
 import (
-	"io/ioutil"
 	"database/sql"
+	"io/ioutil"
 	"log"
+	"path/filepath"
 )
 
 const (
@@ -50,10 +50,10 @@ w text)`
 level string,
 pid string,
 code string, message string)`
-	CREATE_CRASH_LOG_TABLE = "crash_logs"
+	CREATE_CRASH_LOG_TABLE  = "crash_logs"
 	CREATE_ERLANG_LOG_TABLE = "erlang_logs"
-	CREATE_ERROR_LOG_TABLE = "error_logs"
-	CREATE_NODE_TABLE = "create table nodes(appconfig string, vmargs string)"
+	CREATE_ERROR_LOG_TABLE  = "error_logs"
+	CREATE_NODE_TABLE       = "create table nodes(appconfig string, vmargs string)"
 	// TODO: ring
 )
 
@@ -109,41 +109,41 @@ INSERT INTO node_commands
 	}
 	stmt.Exec(
 		base_path,
-		Content(base_path + "/cpuinfo"),
-		Content(base_path + "/date"),
-		Content(base_path + "/debian_version"),
-		Content(base_path + "/df"),
-		Content(base_path + "/df_i"),
-		Content(base_path + "/disk_by_id"),
-		Content(base_path + "/diskstats"),
-		Content(base_path + "/dmesg"),
-		Content(base_path + "/dpkg"),
-		Content(base_path + "/free"),
-		Content(base_path + "/hostname"),
-		Content(base_path + "/iostat_linux"),
-		Content(base_path + "/last"),
-		Content(base_path + "/limits.conf"),
-		Content(base_path + "/lsb_release"),
-		Content(base_path + "/meminfo"),
-		Content(base_path + "/messages"),
-		Content(base_path + "/mount"),
-		Content(base_path + "/netstat_an"),
-		Content(base_path + "/netstat_i"),
-		Content(base_path + "/netstat_rn"),
-		Content(base_path + "/ps"),
-		Content(base_path + "/riak_aae_status"),
-		Content(base_path + "/riak_diag"),
-		Content(base_path + "/riak_member_status"),
-		Content(base_path + "/riak_ping"),
-		Content(base_path + "/riak_repl_status"),
-		Content(base_path + "/riak_status"),
-		Content(base_path + "/riak_transfers"),
-		Content(base_path + "/riak_version"),
-		Content(base_path + "/rx_crc_errors"),
-		Content(base_path + "/schedulers"),
-		Content(base_path + "/uname"),
-		Content(base_path + "/vmstat"),
-		Content(base_path + "/w"),
+		Content(base_path+"/cpuinfo"),
+		Content(base_path+"/date"),
+		Content(base_path+"/debian_version"),
+		Content(base_path+"/df"),
+		Content(base_path+"/df_i"),
+		Content(base_path+"/disk_by_id"),
+		Content(base_path+"/diskstats"),
+		Content(base_path+"/dmesg"),
+		Content(base_path+"/dpkg"),
+		Content(base_path+"/free"),
+		Content(base_path+"/hostname"),
+		Content(base_path+"/iostat_linux"),
+		Content(base_path+"/last"),
+		Content(base_path+"/limits.conf"),
+		Content(base_path+"/lsb_release"),
+		Content(base_path+"/meminfo"),
+		Content(base_path+"/messages"),
+		Content(base_path+"/mount"),
+		Content(base_path+"/netstat_an"),
+		Content(base_path+"/netstat_i"),
+		Content(base_path+"/netstat_rn"),
+		Content(base_path+"/ps"),
+		Content(base_path+"/riak_aae_status"),
+		Content(base_path+"/riak_diag"),
+		Content(base_path+"/riak_member_status"),
+		Content(base_path+"/riak_ping"),
+		Content(base_path+"/riak_repl_status"),
+		Content(base_path+"/riak_status"),
+		Content(base_path+"/riak_transfers"),
+		Content(base_path+"/riak_version"),
+		Content(base_path+"/rx_crc_errors"),
+		Content(base_path+"/schedulers"),
+		Content(base_path+"/uname"),
+		Content(base_path+"/vmstat"),
+		Content(base_path+"/w"),
 	)
 	defer stmt.Close()
 
@@ -153,4 +153,21 @@ INSERT INTO node_commands
 		tx.Rollback()
 	}
 	log.Println("importing %v successfully done.", base_path)
+}
+
+func ImportLogsResult(base_path string, db *sql.DB) {
+	console_logs, err := filepath.Glob(base_path + "/console.log*")
+	if err != nil {
+		log.Printf("no console.log files: " + err.Error())
+	}
+	tx, e := db.Begin()
+	for _, console_log := range console_logs {
+
+		log.Printf(console_log)
+		tokens, e := Parse(console_log)
+		if e != nil {
+			log.Println("errrrrrrrrrrrrrRR")
+		}
+		log.Println("%v", tokens)
+	}
 }
