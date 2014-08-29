@@ -4,15 +4,15 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"log"
 	_ "github.com/mattn/go-sqlite3"
+	"investigator/riak_debug"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-// subcommands :=
-
+// subcommands
 func usage() {
 	str := `
 $ investigator import <tag> [riak-debug | riak-cs-debug] 
@@ -31,6 +31,7 @@ func main() {
 		usage()
 		return
 	}
+
 	switch args[0] {
 	case "import":
 		do_import(args[1], args[2])
@@ -66,30 +67,28 @@ func do_import(tag, file string) {
 	import_target := tag + "/" + filename[:len(filename)-7]
 	fmt.Println("import target: %s\n", import_target)
 
-	//c, _ := sqlite3.Open("sqlite.db")
-	c, err := sql.Open("sqlite3", "test.db")
+	c, err := sql.Open("sqlite3", tag+"/riak_debug.db")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, e := c.Exec("CREATE TABLE x(a integer, b integer, c integer)")
-	if e != nil {
-		log.Fatal(e)
-	}
 
-	tx, _ := c.Begin()
-	stmt, _ := tx.Prepare("INSERT INTO x VALUES(?, ?, ?)")
-	defer stmt.Close()
-	stmt.Exec(1, 1, 0)
-	tx.Commit()
+	riak_debug.MaybeCreateAllTables(c)
+	riak_debug.ImportCommandsResult(import_target + "/commands", c)
 
-	rows, _ := c.Query("SELECT rowid, * FROM x")
-	defer rows.Close()
-	for rows.Next() {
-		var a, b, c int
-		rows.Scan(&a, &b, &c)
-		fmt.Println("%v %v %v", a, b, c)
-	}
-	c.Close()
+	//tx, _ := c.Begin()
+	//stmt, _ := tx.Prepare("INSERT INTO x VALUES(?, ?, ?)")
+	//defer stmt.Close()
+	//stmt.Exec(1, 1, 0)
+	//tx.Commit()
+
+	//rows, _ := c.Query("SELECT rowid, * FROM node_commands")
+	//defer rows.Close()
+	//for rows.Next() {
+	//	var a, b, c int
+	//	rows.Scan(&a, &b, &c)
+	//	fmt.Println("%v %v %v", a, b, c)
+	//}
+	//c.Close()
 }
 func do_diag(tag string) {
 }
