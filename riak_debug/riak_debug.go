@@ -2,8 +2,10 @@ package riak_debug
 
 import (
 	"database/sql"
+	"github.com/josh/gobert"
 	"io/ioutil"
 	"log"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -160,14 +162,37 @@ func ImportLogsResult(base_path string, db *sql.DB) {
 	if err != nil {
 		log.Printf("no console.log files: " + err.Error())
 	}
-	tx, e := db.Begin()
+	//tx, e := db.Begin()
 	for _, console_log := range console_logs {
 
 		log.Printf(console_log)
-		tokens, e := Parse(console_log)
-		if e != nil {
-			log.Println("errrrrrrrrrrrrrRR")
-		}
-		log.Println("%v", tokens)
+		//tokens, e := Parse(console_log)
+		//if e != nil {
+		//log.Println("errrrrrrrrrrrrrRR")
+		//}
+		//log.Println("%v", tokens)
 	}
+}
+
+func ImportConfig(base_path string) {
+	app_config_filename := filepath.Join(base_path, "app.config")
+	tmp_filename := "/tmp/tmpfile_investigator"
+	converter := `file:write_file("` + tmp_filename + `",term_to_binary(element(2, file:consult("` + app_config_filename + `")))).`
+	cmd := exec.Command("erl", "-eval", converter, "-s", "init", "stop", "-noshell", "-hidden")
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("data converted and saved to " + tmp_filename)
+
+	b, e := ioutil.ReadFile(tmp_filename)
+	if e != nil {
+		log.Fatal(err)
+	}
+	log.Println("read %d bytes from %s", len(b), tmp_filename)
+	term, e1 := bert.Decode(b)
+	if e1 != nil {
+		log.Fatal(e1)
+	}
+	log.Print("%v\n", term)
 }

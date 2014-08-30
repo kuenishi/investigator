@@ -1,10 +1,10 @@
 package main
 
 import (
-	"database/sql"
+	//"database/sql"
 	"flag"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/mattn/go-sqlite3"
 	"investigator/riak_debug"
 	"log"
 	"os"
@@ -67,14 +67,15 @@ func do_import(tag, file string) {
 	import_target := tag + "/" + filename[:len(filename)-7]
 	fmt.Println("import target: %s\n", import_target)
 
-	c, err := sql.Open("sqlite3", tag+"/riak_debug.db")
+	//c, err := sql.Open("sqlite3", tag+"/riak_debug.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	riak_debug.MaybeCreateAllTables(c)
-	riak_debug.ImportCommandsResult(import_target+"/commands", c)
-	riak_debug.ImportLogsResult(import_target+"/logs/platform_log_dir", c)
+	//riak_debug.MaybeCreateAllTables(c)
+	//riak_debug.ImportCommandsResult(import_target+"/commands", c)
+	//riak_debug.ImportLogsResult(import_target+"/logs/platform_log_dir", c)
+	riak_debug.ImportConfig(import_target + "/config")
 
 	//tx, _ := c.Begin()
 	//stmt, _ := tx.Prepare("INSERT INTO x VALUES(?, ?, ?)")
@@ -89,7 +90,7 @@ func do_import(tag, file string) {
 	//	rows.Scan(&a, &b, &c)
 	//	fmt.Println("%v %v %v", a, b, c)
 	//}
-	defer c.Close()
+	//defer c.Close()
 }
 func do_diag(tag string) {
 }
